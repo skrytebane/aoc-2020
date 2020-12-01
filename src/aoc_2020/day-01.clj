@@ -1,21 +1,18 @@
 (ns aoc-2020.core)
 
-(defn read-numbers [filename]
-  (->> filename
-       io/resource
-       io/file
-       slurp
-       str/trim
-       str/split-lines
-       (map #(Integer/parseInt %))))
+(defn parse-numbers [lines]
+  (map #(Integer/parseInt %) lines))
 
-(defn find-2020 [filename n]
-  (->> (comb/combinations (read-numbers filename) n)
-       (filter #(= 2020 (reduce + %)))
-       first))
+(defn find-2020 [n numbers]
+  (->> (comb/combinations numbers n)
+       (filter #(= 2020 (reduce + %)))))
 
 (defn solution-day01 [filename n]
-  (let [result (find-2020 filename n)]
+  (let [result (->> filename
+                    slurp-lines
+                    parse-numbers
+                    (find-2020 n)
+                    first)]
     (vector result (reduce * result))))
 
 (comment

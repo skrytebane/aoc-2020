@@ -5,5 +5,13 @@
             [clojure.set :as set]
             [clojure.math.combinatorics :as comb]))
 
+(defn slurp-lines [filename]
+  (->> filename
+       io/resource
+       io/file
+       slurp
+       str/trim
+       str/split-lines))
+
 (defn -main []
   (println "Hei, verda."))
