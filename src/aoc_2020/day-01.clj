@@ -18,7 +18,8 @@
   (let [result (find-2020 filename n)]
     (vector result (reduce * result))))
 
-(solution-day01 "sample-01.txt" 2)
-(solution-day01 "sample-01.txt" 3)
-(solution-day01 "input-01.txt" 2)
-(solution-day01 "input-01.txt" 3)
+(comment
+  (solution-day01 "sample-01.txt" 2)
+  (solution-day01 "sample-01.txt" 3)
+  (solution-day01 "input-01.txt" 2)
+  (solution-day01 "input-01.txt" 3))
