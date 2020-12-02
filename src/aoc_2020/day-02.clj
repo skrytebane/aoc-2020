@@ -8,8 +8,7 @@
 (defn valid-password [entry]
   (let [[from to letter password] entry
         matches (count (re-seq (re-pattern letter) password))]
-    (and (>= matches from)
-         (<= matches to))))
+    (<= from matches to)))
 
 (defn solution-day02 [filename]
   (->> filename

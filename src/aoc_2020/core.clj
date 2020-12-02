@@ -13,5 +13,8 @@
        str/trim
        str/split-lines))
 
+(defn parse-numbers [lines]
+  (map #(Integer/parseInt %) lines))
+
 (defn -main []
   (println "Hei, verda."))
