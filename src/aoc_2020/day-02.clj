@@ -15,8 +15,26 @@
   (->> filename
        slurp-lines
        (map parse-line)
-       (filter valid-password)))
+       (filter valid-password)
+       count))
+
+(defn valid-password-b [entry]
+  (let [[pos-1 pos-2 letter password] entry]
+    (= 1
+       (count (re-seq (re-pattern letter)
+                      (str (nth password (dec pos-1))
+                           (nth password (dec pos-2))))))))
+
+(defn solution-day02-b [filename]
+  (->> filename
+       slurp-lines
+       (map parse-line)
+       (filter valid-password-b)
+       count))
 
 (comment
   (solution-day02 "sample-02.txt")
+  (solution-day02 "input-02.txt")
+  (solution-day02-b "sample-02.txt")
+  (solution-day02-b "input-02.txt")
   )
