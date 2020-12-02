@@ -16,5 +16,11 @@
 (defn parse-numbers [lines]
   (map #(Integer/parseInt %) lines))
 
+(def kv-pat #"^([a-zA-Z0-9]+):\s*(.+)$")
+
+(defn parse-kv-line [line]
+  (let [[_ key value] (re-matches kv-pat line)]
+    (and key {(keyword (str *ns*) key) value})))
+
 (defn -main []
   (println "Hei, verda."))
