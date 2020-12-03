@@ -12,7 +12,7 @@
           (count m)))
 
 (defn show-map [m]
-  (let [[width height] (map-size m)]
+  (let [[_ height] (map-size m)]
     (dotimes [y height]
       (println (apply str (nth m y))))))
 
@@ -22,36 +22,31 @@
 (defn move [m x y move-x move-y]
   (let [[width _] (map-size m)
         new-y (+ y move-y)
-        line (nth m new-y)
         new-x (mod (+ x move-x) width)]
     (vector new-x new-y)))
 
-(defn ride
-  ([m] (ride m 3 1))
-  ([m right down]
-   (let [[_ height] (map-size m)]
-     (loop [x 0
-            y 0
-            trail []]
-       (if (= y (dec height))
-         trail
-         (let [[new-x new-y] (move m x y right down)]
-           (recur new-x new-y (conj trail (map-get m new-x new-y)))))))))
+(defn ride [m right down]
+  (let [[_ height] (map-size m)]
+    (loop [x 0
+           y 0
+           trail []]
+      (if (= y (dec height))
+        trail
+        (let [[new-x new-y] (move m x y right down)]
+          (recur new-x new-y (conj trail (map-get m new-x new-y))))))))
 
 (defn read-map [filename]
   (->> filename slurp-lines parse-map))
 
-(defn count-ride
-  ([m] (count-ride m 3 1))
-  ([m right down]
-   (->> (ride m right down)
-        (filter #(= % \#))
-        count)))
+(defn count-ride [m right down]
+  (->> (ride m right down)
+       (filter #(= % \#))
+       count))
 
 (defn solution-day03 [filename]
-  (->> filename
-       read-map
-       count-ride))
+  (-> filename
+      read-map
+      (count-ride 3 1)))
 
 (def alternatives [[1 1]
                    [3 1]
