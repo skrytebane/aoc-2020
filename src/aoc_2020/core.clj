@@ -3,7 +3,8 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.set :as set]
-            [clojure.math.combinatorics :as comb]))
+            [clojure.math.combinatorics :as comb]
+            [clojure.java.shell :as sh]))
 
 (defn slurp-lines [filename]
   (->> filename
@@ -21,6 +22,13 @@
 (defn parse-kv-line [line]
   (let [[_ key value] (re-matches kv-pat line)]
     (and key {(keyword (str *ns*) key) value})))
+
+(defn copy-to-clipboard [s]
+  (let [copy (str s)
+        result (sh/sh "xsel" "-b" :in copy)]
+    (if (= (:exit result) 0)
+      {:solution s :copied copy}
+      {:solution s :failed-copy copy})))
 
 (defn -main []
   (println "Hei, verda."))
