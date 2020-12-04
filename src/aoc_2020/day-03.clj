@@ -11,11 +11,6 @@
   (vector (count (nth m 0))
           (count m)))
 
-(defn show-map [m]
-  (let [[_ height] (map-size m)]
-    (dotimes [y height]
-      (println (apply str (nth m y))))))
-
 (defn map-get [m x y]
   (nth (nth m y) x))
 
@@ -30,7 +25,7 @@
     (loop [x 0
            y 0
            trail []]
-      (if (= y (dec height))
+      (if (>= y (dec height))
         trail
         (let [[new-x new-y] (move m x y right down)]
           (recur new-x new-y (conj trail (map-get m new-x new-y))))))))
