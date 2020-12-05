@@ -1,29 +1,28 @@
 (ns aoc-2020.core)
 
-;; :cid not required
+;; :cid is optional
 (def required-fields #{:byr :iyr :eyr :hgt :hcl :ecl :pid})
 
 (defn valid-height? [s]
-  (let [[_ height-string unit] (re-matches #"([0-9]+)(cm|in)" s)
-        height (and height-string (Integer/parseInt height-string))]
-    (and height
-         (case unit
-           "cm" (<= 150 height 193)
-           "in" (<= 59 height 76)))))
+  (when-let [[_ height-string unit] (re-matches #"([0-9]+)(cm|in)" s)]
+    (let [height (Integer/parseInt height-string)]
+      (case unit
+        "cm" (<= 150 height 193)
+        "in" (<= 59 height 76)))))
 
 (defn valid-eyecolor? [s]
   (contains? #{"amb" "blu" "brn" "gry" "grn" "hzl" "oth"} s))
 
-(defn valid-passport-a? [passport]
-  (zero? (count (set/difference required-fields (set (keys passport))))))
-
 (defn valid-year-range? [s from to]
-  (and (re-matches #"\d{4}" s)
-       (let [value (Integer/parseInt s)]
-         (<= from value to))))
+  (when (re-matches #"\d{4}" s)
+    (<= from (Integer/parseInt s) to)))
+
+(defn barely-valid-passport? [passport]
+  (empty?
+   (set/difference required-fields (set (keys passport)))))
 
 (defn valid-passport? [passport]
-  (and (valid-passport-a? passport)
+  (and (barely-valid-passport? passport)
        (and (valid-year-range? (:byr passport) 1920 2002)
             (valid-year-range? (:iyr passport) 2010 2020)
             (valid-year-range? (:eyr passport) 2020 2030)
@@ -35,25 +34,22 @@
 (defn parse-passport [items]
   (->> items
        (map #(str/split % #":"))
-       (map (fn [kv]
-              (let [[key value] kv]
-                {(keyword key) value})))
-       (apply merge)))
+       (map #(let [[key value] %]
+               {(keyword key) value}))
+       (reduce conj)))
 
 (defn parse-passports [filename]
   (->> filename
        slurp-lines
        (partition-by #(= % ""))
-       (filter #(not (and (= 1 (count %))
-                          (= "" (first %)))))
-       (map #(map (fn [line] (str/split line #"\s+")) %))
-       (map flatten)
+       (remove #(= % '("")))
+       (map #(mapcat split-whitespace %))
        (map parse-passport)))
 
 (defn solution-day04 [filename]
   (->> filename
        parse-passports
-       (filter valid-passport-a?)
+       (filter barely-valid-passport?)
        count))
 
 (defn solution-day04b [filename]
