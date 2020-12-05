@@ -23,13 +23,13 @@
 
 (defn valid-passport? [passport]
   (and (has-required-fields? passport)
-       (and (valid-year-range? (:byr passport) 1920 2002)
-            (valid-year-range? (:iyr passport) 2010 2020)
-            (valid-year-range? (:eyr passport) 2020 2030)
-            (valid-height? (:hgt passport))
-            (re-matches #"#[a-z0-9]{6}" (:hcl passport))
-            (valid-eyecolor? (:ecl passport))
-            (re-matches #"[0-9]{9}" (:pid passport)))))
+       (valid-year-range? (:byr passport) 1920 2002)
+       (valid-year-range? (:iyr passport) 2010 2020)
+       (valid-year-range? (:eyr passport) 2020 2030)
+       (valid-height? (:hgt passport))
+       (re-matches #"#[a-z0-9]{6}" (:hcl passport))
+       (valid-eyecolor? (:ecl passport))
+       (re-matches #"[0-9]{9}" (:pid passport))))
 
 (defn parse-passport [items]
   (->> items
