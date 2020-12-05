@@ -11,34 +11,30 @@
    (int (Math/floor (/ n div))))
   ([n] (floor n 1)))
 
-(defn parse-direction [direction]
-  (case direction
-    (\F \L) :lower
-    (\B \R) :upper))
-
-(defn new-range [direction from to]
-  (let [diff (- to from)
+(defn new-range [direction rng]
+  (let [[from to] rng
+        diff (- to from)
         half (floor diff 2)]
-    (case (parse-direction direction)
-      :lower (vector from (+ from half))
-      :upper (vector (+ from half 1) to))))
+    (case direction
+      (\F \L) (vector from (+ from half))
+      (\B \R) (vector (+ from half 1) to))))
 
 (defn parse-bsp [directions from to]
-  (loop [from from
-         to to
-         remaining (seq directions)]
-    (if (first remaining)
-      (let [[new-from new-to] (new-range (first remaining) from to)]
-        (recur new-from new-to (rest remaining)))
-      from)))
+  (loop [remaining directions
+         rng (vector from to)]
+    (if (empty? remaining)
+      (peek rng)
+      (recur (rest remaining)
+             (new-range (first remaining) rng)))))
+
+(defn make-seat [row col]
+  {:row row :col col :id (+ (* row 8) col)})
 
 (defn parse-seating [s]
-  (let [[_ row col] (re-matches #"^([FB]{7})([LR]{3})" s)
-        parsed-row (parse-bsp row 0 127)
-        parsed-col (parse-bsp col 0 7)]
-    {:row parsed-row
-     :col parsed-col
-     :id (+ (* parsed-row 8) parsed-col)}))
+  (let [[_ row-string col-string] (re-matches #"^([FB]{7})([LR]{3})" s)
+        row (parse-bsp row-string 0 127)
+        col (parse-bsp col-string 0 7)]
+    (make-seat row col)))
 
 (defn check-sample [k]
   (let [expected (get sample-inputs k)
@@ -62,33 +58,26 @@
   (->> filename
        slurp-lines
        (map parse-seating)
-       (apply max-key :id)))
+       (apply max-key :id)
+       :id))
 
 (defn solution-day05-b [filename]
   (let [passes (->> filename
                     slurp-lines
                     (map parse-seating)
-                    (map #(vector (:row %) (:col %)))
                     set)
-        all-places (set
-                    (for [x (range 0 128)
-                          y (range 0 8)]
-                      [x y]))
-        missing (set/difference all-places passes)]
-    (->> missing
-         (group-by first)
-         (filter #(not (= 8 (count (second %)))))
-         (map second)
-         (map
-          #(map
-            (fn [kv]
-              (let [[row col] kv]
-                {:row row :col col :id (+ (* row 8) col)}))
-            %))
-         flatten
+        seats (->> (for [x (range 0 128)
+                         y (range 0 8)]
+                     [x y])
+                   (map #(apply make-seat %))
+                   set)]
+    (->> (set/difference seats passes)
+         (group-by :row)
+         (filter #(< (count (second %)) 8))
+         (mapcat second)
          (sort-by :id))))
 
 (comment
   (solution-day05 "input-05.txt")
-  (solution-day05-b "input-05.txt") ;; Måtte gjette mellom alternativa her.
+  (solution-day05-b2 "input-05.txt") ;; Måtte gjette mellom alternativa her.
   )
