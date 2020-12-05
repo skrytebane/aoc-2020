@@ -11,6 +11,11 @@
    (int (Math/floor (/ n div))))
   ([n] (floor n 1)))
 
+(defn parse-direction [direction]
+  (case direction
+    (\F \L) :lower
+    (\B \R) :upper))
+
 (defn new-range [direction from to]
   (let [diff (- to from)
         half (floor diff 2)]
@@ -26,11 +31,6 @@
       (let [[new-from new-to] (new-range (first remaining) from to)]
         (recur new-from new-to (rest remaining)))
       from)))
-
-(defn parse-direction [direction]
-  (case direction
-    (\F \L) :lower
-    (\B \R) :upper))
 
 (defn parse-seating [s]
   (let [[_ row col] (re-matches #"^([FB]{7})([LR]{3})" s)
@@ -77,9 +77,18 @@
         missing (set/difference all-places passes)]
     (->> missing
          (group-by first)
-         (filter #(not (= 8 (count (second %))))))))
+         (filter #(not (= 8 (count (second %)))))
+         (map second)
+         (map
+          #(map
+            (fn [kv]
+              (let [[row col] kv]
+                {:row row :col col :id (+ (* row 8) col)}))
+            %))
+         flatten
+         (sort-by :id))))
 
 (comment
   (solution-day05 "input-05.txt")
-  (solution-day05-b "input-05.txt")
+  (solution-day05-b "input-05.txt") ;; Måtte gjette mellom alternativa her.
   )
