@@ -27,7 +27,7 @@
        (valid-year-range? (:iyr passport) 2010 2020)
        (valid-year-range? (:eyr passport) 2020 2030)
        (valid-height? (:hgt passport))
-       (re-matches #"#[a-z0-9]{6}" (:hcl passport))
+       (re-matches #"#[a-f0-9]{6}" (:hcl passport))
        (valid-eyecolor? (:ecl passport))
        (re-matches #"[0-9]{9}" (:pid passport))))
 
