@@ -1,5 +1,9 @@
 (ns aoc-2020.core)
 
+;; This solution is very roundabout. Rows and cols aren't really
+;; needed, and the codes are much simpler to compute than what
+;; I've done here.
+
 (def sample-inputs
   {"FBFBBFFRLR" {:row 44 :col 5 :id 357}
    "BFFFBBFRRR" {:row 70 :col 7 :id 567}
@@ -61,23 +65,19 @@
        (apply max-key :id)
        :id))
 
-(defn solution-day05-b [filename]
-  (let [passes (->> filename
-                    slurp-lines
-                    (map parse-seating)
-                    set)
-        seats (->> (for [x (range 0 128)
-                         y (range 0 8)]
-                     [x y])
-                   (map #(apply make-seat %))
-                   set)]
-    (->> (set/difference seats passes)
-         (group-by :row)
-         (filter #(< (count (second %)) 8))
-         (mapcat second)
-         (sort-by :id))))
+(defn solution-day05-b3 [filename]
+  (->> filename
+       slurp-lines
+       (map parse-seating)
+       (map :id)
+       sort
+       (partition 2 1)
+       (filter (fn [[a b]]
+                 (= (- b a) 2)))
+       ffirst
+       inc))
 
 (comment
   (solution-day05 "input-05.txt")
-  (solution-day05-b2 "input-05.txt") ;; Måtte gjette mellom alternativa her.
+  (solution-day05-b3 "input-05.txt")
   )
