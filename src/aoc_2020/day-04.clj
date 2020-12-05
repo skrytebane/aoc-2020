@@ -17,12 +17,12 @@
   (when (re-matches #"\d{4}" s)
     (<= from (Integer/parseInt s) to)))
 
-(defn barely-valid-passport? [passport]
+(defn has-required-fields? [passport]
   (empty?
    (set/difference required-fields (set (keys passport)))))
 
 (defn valid-passport? [passport]
-  (and (barely-valid-passport? passport)
+  (and (has-required-fields? passport)
        (and (valid-year-range? (:byr passport) 1920 2002)
             (valid-year-range? (:iyr passport) 2010 2020)
             (valid-year-range? (:eyr passport) 2020 2030)
@@ -49,7 +49,7 @@
 (defn solution-day04 [filename]
   (->> filename
        parse-passports
-       (filter barely-valid-passport?)
+       (filter has-required-fields?)
        count))
 
 (defn solution-day04b [filename]
