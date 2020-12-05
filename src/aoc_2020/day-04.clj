@@ -36,7 +36,7 @@
        (map #(str/split % #":"))
        (map #(let [[key value] %]
                {(keyword key) value}))
-       (reduce conj)))
+       (into {})))
 
 (defn parse-passports [filename]
   (->> filename
