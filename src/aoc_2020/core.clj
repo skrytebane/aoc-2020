@@ -5,7 +5,8 @@
             [clojure.set :as set]
             [clojure.math.combinatorics :as comb]
             [clojure.java.shell :as sh]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [clojure.spec.alpha :as s]))
 
 (defn slurp-lines [filename]
   (->> filename
