@@ -5,12 +5,12 @@
 (defn parse-questions [filename]
   (->> filename
        slurp-groups
-       (map #(map (partial into []) %))))
+       (map #(map vec %))))
 
 (defn solution-day06 [filename]
   (->> filename
        parse-questions
-       (map #(set (flatten %)))
+       (map (comp set flatten))
        (map count)
        (reduce +)))
 

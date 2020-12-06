@@ -3,9 +3,7 @@
 
 (defn parse-map [lines]
   "[y,x] 2D-vector"
-  (->> lines
-       (map #(into [] %))
-       (into [])))
+  (mapv vec lines))
 
 (defn map-size [m]
   "Returns [width height]"
