@@ -1,6 +1,5 @@
 (ns aoc-2020.day-04-spec
   (:require [aoc-2020.core :refer [slurp-lines split-whitespace]]
-            [aoc-2020.day-04 :refer [parse-passport]]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]))
 
@@ -57,7 +56,7 @@
        (partition-by #(= % ""))
        (remove #(= % '("")))
        (map #(mapcat split-whitespace %))
-       (map parse-passport)))
+       (map parse-passport-spec)))
 
 (defn valid-passport-spec? [passport]
   (s/valid? ::passport passport))
