@@ -52,12 +52,9 @@
        (map check-sample)))
 
 (defn solution-day05-samples []
-  (apply
-   max-key
-   :id
-   (->> sample-inputs
-        keys
-        (map parse-seating))))
+  (-> (apply max-key :id
+             (->> sample-inputs keys (map parse-seating)))
+      :id))
 
 (defn solution-day05 [filename]
   (->> filename

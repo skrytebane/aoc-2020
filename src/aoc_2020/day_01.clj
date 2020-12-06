@@ -12,7 +12,7 @@
                     parse-numbers
                     (find-2020 n)
                     first)]
-    (vector result (reduce * result))))
+    (reduce * result)))
 
 (comment
   (solution-day01 "sample-01.txt" 2)
