@@ -2,10 +2,8 @@
 
 (defn parse-questions [filename]
   (->> filename
-       slurp-lines
-       (partition-by #(= % ""))
-       (remove #(= % '("")))
-       (map #(map (fn [s] (str/split s #"")) %))))
+       slurp-groups
+       (map #(map (partial into []) %))))
 
 (defn solution-day06 [filename]
   (->> filename

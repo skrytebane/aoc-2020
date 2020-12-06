@@ -16,6 +16,15 @@
        str/trim
        str/split-lines))
 
+(defn slurp-groups [filename]
+  (map str/split-lines
+       (-> filename
+           io/resource
+           io/file
+           slurp
+           str/trim
+           (str/split #"\R\R"))))
+
 (defn parse-numbers [lines]
   (map #(Integer/parseInt %) lines))
 
