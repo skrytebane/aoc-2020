@@ -1,4 +1,6 @@
-(ns aoc-2020.core)
+(ns aoc-2020.day-06
+  (:require [aoc-2020.core :refer [slurp-groups]]
+            [clojure.set :as set]))
 
 (defn parse-questions [filename]
   (->> filename

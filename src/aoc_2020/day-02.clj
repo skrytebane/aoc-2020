@@ -1,4 +1,6 @@
-(ns aoc-2020.core)
+(ns aoc-2020.day-02
+  (:require [aoc-2020.core :refer [parse-numbers slurp-lines]]
+            [clojure.string :as str]))
 
 (defn parse-line [line]
   (let [[reps letter password] (str/split line #":?\s")

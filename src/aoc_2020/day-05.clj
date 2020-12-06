@@ -1,4 +1,5 @@
-(ns aoc-2020.core)
+(ns aoc-2020.day-05
+  (:require [aoc-2020.core :refer [slurp-lines]]))
 
 ;; This solution is very roundabout. Rows and cols aren't really
 ;; needed, and the codes are much simpler to compute than what

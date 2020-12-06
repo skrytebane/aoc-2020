@@ -2,11 +2,7 @@
   (:gen-class)
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.set :as set]
-            [clojure.math.combinatorics :as comb]
-            [clojure.java.shell :as sh]
-            [clojure.data.json :as json]
-            [clojure.spec.alpha :as s]))
+            [clojure.java.shell :as sh]))
 
 (defn slurp-lines [filename]
   (->> filename

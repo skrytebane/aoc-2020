@@ -1,4 +1,7 @@
-(ns aoc-2020.core)
+(ns aoc-2020.day-04
+  (:require [aoc-2020.core :refer [slurp-lines split-whitespace]]
+            [clojure.set :as set]
+            [clojure.string :as str]))
 
 ;; :cid is optional
 (def required-fields #{:byr :iyr :eyr :hgt :hcl :ecl :pid})

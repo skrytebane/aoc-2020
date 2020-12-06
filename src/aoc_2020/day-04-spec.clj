@@ -1,4 +1,8 @@
-(ns aoc-2020.core)
+(ns aoc-2020.day-04-spec
+  (:require [aoc-2020.core :refer [slurp-lines split-whitespace]]
+            [aoc-2020.day-04 :refer [parse-passport]]
+            [clojure.spec.alpha :as s]
+            [clojure.string :as str]))
 
 (s/def ::birth-year (s/int-in 1920 2003))
 (s/def ::issue-year (s/int-in 2010 2021))
