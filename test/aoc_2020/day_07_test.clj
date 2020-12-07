@@ -4,17 +4,17 @@
 
 (deftest sample-1a
   (testing "Sample should match expected output."
-    (is (= (solution-day07 "sample-07.txt") \a))))
+    (is (= (solution-day07 "sample-07.txt" :shiny-gold) 4))))
 
 (deftest sample-1b
   (testing "Sample should match expected output."
-    (is (= (solution-day07-b "sample-07.txt") \b))))
+    (is (= (solution-day07-b "sample-07.txt") 32))))
 
 ;; These are regression tests, basically:
 (deftest input-1a
   (testing "Input should match expected output."
-    (is (= (solution-day07 "input-07.txt") \c))))
+    (is (= (solution-day07 "input-07.txt" :shiny-gold) 370))))
 
 (deftest input-1b
   (testing "Input should match expected output."
-    (is (= (solution-day07-b "input-07.txt") \d))))
+    (is (= (solution-day07-b "input-07.txt") 29547))))
