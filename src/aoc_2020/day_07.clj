@@ -3,6 +3,8 @@
             [clojure.set :as set]
             [clojure.string :as str]))
 
+;; Don't do it like this! Part 1 can be done much more easily!
+
 (defn- keywordify [color]
   (keyword (str/replace color \space \-)))
 
