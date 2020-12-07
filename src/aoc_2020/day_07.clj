@@ -61,13 +61,25 @@
         (get bag)
         count)))
 
+(defn bag-sum [color bags]
+  (let [direct (get bags color)
+        direct-sum (reduce + (vals direct))
+        indirect-sums
+        (reduce + (map (fn [[color size]]
+                         (* size (bag-sum color bags)))
+                       direct))]
+    (+ direct-sum indirect-sums)))
+
 (defn solution-day07-b [filename]
   (->> filename
-       slurp-lines))
+       slurp-lines
+       (map parse-bag-specification)
+       (reduce merge)
+       (bag-sum :shiny-gold)))
 
 (comment
   (solution-day07 "sample-07.txt" :shiny-gold) ;; 4
   (solution-day07 "input-07.txt" :shiny-gold) ;; 370
-  (solution-day07-b "sample-07.txt")
-  (solution-day07-b "input-07.txt")
+  (solution-day07-b "sample-07.txt") ;; 32
+  (solution-day07-b "input-07.txt") ;; 29547
   )
