@@ -10,30 +10,30 @@
 
 (defn- step [program execution]
   (let [ip (:ip execution)
-        [instruction offset] (nth program ip)
-        [update-ip update-acc] (case instruction
-                                 "jmp" [(partial + offset) +]
-                                 "nop" [(fnil inc 0) +]
-                                 "acc" [(fnil inc 0) (partial + offset)])]
-    (-> execution
-        (update-in [:counters ip] (fnil inc 0))
-        (update :ip update-ip)
-        (update :accumulator update-acc))))
+        [instruction offset] (nth program ip)]
+    (-> (case instruction
+          "jmp" (update execution :ip (partial + offset))
+          "nop" (update execution :ip (fnil inc 0))
+          "acc" (-> execution
+                    (update :ip (fnil inc 0))
+                    (update :accumulator (partial + offset))))
+        (update-in [:counters ip] (fnil inc 0)))))
+
+(defn- halted? [program execution previous-ip]
+  (let [final-instruction (dec (count program))]
+    (or (>= (:ip execution) final-instruction)
+        (> (get (:counters execution) previous-ip 0)
+           1))))
 
 (defn- execute-program [program]
-  (let [initial-execution {:ip 0
-                           :counters {}
-                           :accumulator 0}
-        final-instruction (dec (count program))]
-    (loop [previous-ip (:ip initial-execution)
-           execution (step program initial-execution)
-           trace [execution]]
-      (if (or (> (get (:counters execution) previous-ip 0)
-                 1)
-              (= (:ip execution) final-instruction))
+  (let [initial-execution {:ip 0, :counters {}, :accumulator 0}]
+    (loop [execution (step program initial-execution)
+           trace [execution]
+           previous-ip (:ip execution)]
+      (if (halted? program execution previous-ip)
         trace
         (let [next-step (step program execution)]
-          (recur (:ip execution) next-step (conj trace next-step)))))))
+          (recur next-step (conj trace next-step) (:ip execution)))))))
 
 (defn solution-day08 [filename]
   (->> filename
