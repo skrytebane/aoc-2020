@@ -18,17 +18,18 @@
                     :ip (inc ip)
                     :accumulator (+ (:accumulator execution) offset))
        "jmp" (assoc execution :ip (+ ip offset)))
-     :counters (update-in (:counters execution) [ip] inc))))
+     :counters (update (:counters execution) ip (fnil inc 0)))))
 
 (defn- execute-program [program]
   (let [initial-execution {:ip 0
-                           :counters (vec (take (count program) (repeat 0)))
+                           :counters {}
                            :accumulator 0}
         final-instruction (dec (count program))]
     (loop [previous-ip (:ip initial-execution)
            execution (step program initial-execution)
            trace [execution]]
-      (if (or (> (get (:counters execution) previous-ip) 1)
+      (if (or (> (get (:counters execution) previous-ip 0)
+                 1)
               (= (:ip execution) final-instruction))
         trace
         (let [next-step (step program execution)]
@@ -51,7 +52,7 @@
    offset])
 
 (defn- twiddle-program [program instruction]
-  (update-in program [instruction] swap-instruction))
+  (update program instruction swap-instruction))
 
 (defn solution-day08-b [filename]
   (let [program (->> filename slurp-lines parse-program)]
