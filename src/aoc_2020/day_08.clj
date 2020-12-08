@@ -55,13 +55,14 @@
   (update program instruction swap-instruction))
 
 (defn solution-day08-b [filename]
-  (let [program (->> filename slurp-lines parse-program)]
+  (let [program (->> filename slurp-lines parse-program)
+        final-instruction (dec (count program))]
     (->> (range (count program))
          (filter #(contains? #{"jmp" "nop"} (first (nth program %))))
          (map #(twiddle-program program %))
          (map execute-program)
          (map last)
-         (filter #(= (:ip %) (dec (count program))))
+         (filter #(= (:ip %) final-instruction))
          first
          :accumulator)))
 
