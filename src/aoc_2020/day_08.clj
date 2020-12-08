@@ -1,22 +1,24 @@
 (ns aoc-2020.day-08
   (:require [aoc-2020.core :refer [slurp-lines]]))
 
+(defn- parse-instruction [line]
+  (let [[_ instruction offset] (re-matches #"([a-zA-Z]+)\s+([+-]\d+)" line)]
+    (vector instruction (Long/parseLong offset))))
+
 (defn- parse-program [lines]
-  (mapv (fn [line]
-          (let [[_ instruction offset] (re-matches #"([a-zA-Z]+)\s+([+-]\d+)" line)]
-            (vector instruction (Long/parseLong offset))))
-        lines))
+  (mapv parse-instruction lines))
 
 (defn- step [program execution]
-  (let [[instruction offset] (nth program (:ip execution))
-        ip (:ip execution)]
-    (assoc (case instruction
-             "nop" (assoc execution :ip (inc ip))
-             "acc" (assoc execution
-                          :ip (inc ip)
-                          :accumulator (+ (:accumulator execution) offset))
-             "jmp" (assoc execution :ip (+ ip offset)))
-           :counters (update-in (:counters execution) [ip] inc))))
+  (let [ip (:ip execution)
+        [instruction offset] (nth program ip)]
+    (assoc
+     (case instruction
+       "nop" (assoc execution :ip (inc ip))
+       "acc" (assoc execution
+                    :ip (inc ip)
+                    :accumulator (+ (:accumulator execution) offset))
+       "jmp" (assoc execution :ip (+ ip offset)))
+     :counters (update-in (:counters execution) [ip] inc))))
 
 (defn execute-program [program]
   (let [execution {:ip 0
