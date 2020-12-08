@@ -10,15 +10,15 @@
 
 (defn- step [program execution]
   (let [ip (:ip execution)
-        [instruction offset] (nth program ip)]
-    (assoc
-     (case instruction
-       "nop" (assoc execution :ip (inc ip))
-       "acc" (assoc execution
-                    :ip (inc ip)
-                    :accumulator (+ (:accumulator execution) offset))
-       "jmp" (assoc execution :ip (+ ip offset)))
-     :counters (update (:counters execution) ip (fnil inc 0)))))
+        [instruction offset] (nth program ip)
+        [update-ip update-acc] (case instruction
+                                 "jmp" [(partial + offset) +]
+                                 "nop" [(fnil inc 0) +]
+                                 "acc" [(fnil inc 0) (partial + offset)])]
+    (-> execution
+        (update-in [:counters ip] (fnil inc 0))
+        (update :ip update-ip)
+        (update :accumulator update-acc))))
 
 (defn- execute-program [program]
   (let [initial-execution {:ip 0
