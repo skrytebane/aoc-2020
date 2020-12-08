@@ -58,7 +58,7 @@
   (let [program (->> filename slurp-lines parse-program)
         final-instruction (dec (count program))]
     (->> (range (count program))
-         (filter #(contains? #{"jmp" "nop"} (first (nth program %))))
+         (remove #(= "acc" (first (nth program %))))
          (map #(twiddle-program program %))
          (map execute-program)
          (map last)
