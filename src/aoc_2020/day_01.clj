@@ -1,6 +1,6 @@
 (ns aoc-2020.day-01
   (:require [clojure.math.combinatorics :as comb]
-            [aoc-2020.core :refer [slurp-lines parse-numbers]]))
+            [aoc-2020.core :refer [slurp-lines parse-ints]]))
 
 (defn find-2020 [n numbers]
   (->> (comb/combinations numbers n)
@@ -9,7 +9,7 @@
 (defn solution-day01 [filename n]
   (let [result (->> filename
                     slurp-lines
-                    parse-numbers
+                    parse-ints
                     (find-2020 n)
                     first)]
     (reduce * result)))

@@ -1,28 +1,28 @@
 (ns aoc-2020.day-09
-  (:require [aoc-2020.core :refer [slurp-lines]]
+  (:require [aoc-2020.core :refer [slurp-lines parse-ints]]
             [clojure.math.combinatorics :as comb]))
 
 (defn- pairs [numbers]
   (comb/combinations numbers 2))
 
 (defn- range-sums [numbers from to]
-  (->> (for [index (range from to)]
-        (nth numbers index))
+  (->> (range from to)
+       (map (partial nth numbers))
        pairs
-       (map #(reduce + %))
+       (map (partial reduce +))
        set))
 
 (defn- read-numbers [filename]
-  (->> filename
-       slurp-lines
-       (map #(Long/parseLong %))
-       vec))
+  (-> filename
+      slurp-lines
+      parse-ints
+      vec))
 
 (defn solution-a [filename preamble-size]
   (let [numbers (read-numbers filename)]
     (->> (range preamble-size (count numbers))
          (remove #(contains? (range-sums numbers (- % preamble-size) %) (nth numbers %)))
-         (map #(nth numbers %))
+         (map (partial nth numbers))
          first)))
 
 (defn solution-b [filename preamble-size]
@@ -38,7 +38,8 @@
                        %))
          (remove empty?)
          ffirst
-         ((juxt (partial reduce min) (partial reduce max)))
+         ((juxt (partial reduce min)
+                (partial reduce max)))
          (reduce +))))
 
 (comment

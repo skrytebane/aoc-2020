@@ -21,8 +21,8 @@
            str/trim
            (str/split #"\R\R"))))
 
-(defn parse-numbers [lines]
-  (map #(Integer/parseInt %) lines))
+(defn parse-ints [lines]
+  (map #(Long/parseLong %) lines))
 
 (defn split-whitespace [s]
   (str/split s #"\s+"))

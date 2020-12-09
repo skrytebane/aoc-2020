@@ -1,10 +1,10 @@
 (ns aoc-2020.day-02
-  (:require [aoc-2020.core :refer [parse-numbers slurp-lines]]
+  (:require [aoc-2020.core :refer [parse-ints slurp-lines]]
             [clojure.string :as str]))
 
 (defn parse-line [line]
   (let [[reps letter password] (str/split line #":?\s")
-        [from to] (parse-numbers (str/split reps #"-"))]
+        [from to] (parse-ints (str/split reps #"-"))]
     (vector from to letter password)))
 
 (defn valid-password [entry]
