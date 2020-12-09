@@ -25,7 +25,7 @@
          (map #(nth numbers %))
          first)))
 
-(defn- get-error-row [filename preamble-size]
+(defn solution-b [filename preamble-size]
   (let [numbers (read-numbers filename)
         invalid-number (solution-a filename preamble-size)
         index (.indexOf numbers invalid-number)
@@ -37,16 +37,13 @@
                          (= (reduce + x) invalid-number))
                        %))
          (filter seq)
-         ffirst)))
-
-(defn solution-b [filename preamble-size]
-  (let [error-row (get-error-row filename preamble-size)]
-    (+ (reduce min error-row)
-       (reduce max error-row))))
+         ffirst
+         ((juxt (partial reduce min) (partial reduce max)))
+         (reduce +))))
 
 (comment
-  (solution-a "sample-09.txt" 5)
-  (solution-a "input-09.txt" 25)
-  (solution-b "sample-09.txt" 5)
-  (solution-b "input-09.txt" 25)
+  (solution-a "sample-09.txt" 5) ;; 127
+  (solution-a "input-09.txt" 25) ;; 1492208709
+  (solution-b "sample-09.txt" 5) ;; 62
+  (solution-b "input-09.txt" 25) ;; 238243506
   )
