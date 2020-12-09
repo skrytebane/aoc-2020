@@ -36,7 +36,7 @@
          (map #(filter (fn [x]
                          (= (reduce + x) invalid-number))
                        %))
-         (filter seq)
+         (remove empty?)
          ffirst
          ((juxt (partial reduce min) (partial reduce max)))
          (reduce +))))
