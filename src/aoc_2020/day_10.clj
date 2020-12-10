@@ -29,9 +29,6 @@
     (* (count (get v 1))
        (count (get v 3)))))
 
-(defn- is [x]
-  (fn [y] (= x y)))
-
 (def valid-connections
   (memoize
    (fn [adapters joltage]
