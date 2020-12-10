@@ -1,6 +1,5 @@
 (ns aoc-2020.day-10
-  (:require [aoc-2020.core :refer [slurp-lines parse-ints]]
-            [clojure.math.combinatorics :as comb]))
+  (:require [aoc-2020.core :refer [slurp-lines parse-ints]]))
 
 (defn- read-jolts [filename]
   (->> filename
@@ -30,21 +29,24 @@
     (* (count (get v 1))
        (count (get v 3)))))
 
-(defn is [x]
+(defn- is [x]
   (fn [y] (= x y)))
 
 (defn- valid-connections [adapters joltage]
-  (if (empty? adapters)
-    1
-    (let [eligible (filter #(<= 1 (- % joltage) 3) adapters)]
-      (if (empty? eligible)
-        1
-        (reduce + (map #(valid-connections (remove (is %) adapters) %)
-                       eligible))))))
+  (letfn [(valid-joltage? [x]
+            (<= 1 (- x joltage) 3))]
+    (if (empty? adapters)
+      1
+      (let [remaining (drop-while (complement valid-joltage?) adapters)
+            eligible (take-while valid-joltage? remaining)]
+        (if (seq eligible)
+          (reduce + (map #(valid-connections (remove (is %) remaining) %)
+                         eligible))
+          1)))))
 
 (defn solution-b [filename]
   (as-> (read-jolts filename) v
-    (valid-connections v 0)))
+    (valid-connections (sort v) 0)))
 
 (defn scratch []
   (solution-b "sample-10-a.txt"))
