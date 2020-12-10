@@ -32,17 +32,19 @@
 (defn- is [x]
   (fn [y] (= x y)))
 
-(defn- valid-connections [adapters joltage]
-  (letfn [(valid-joltage? [x]
-            (<= 1 (- x joltage) 3))]
-    (if (empty? adapters)
-      1
-      (let [remaining (drop-while (complement valid-joltage?) adapters)
-            eligible (take-while valid-joltage? remaining)]
-        (if (seq eligible)
-          (reduce + (map #(valid-connections (remove (is %) remaining) %)
-                         eligible))
-          1)))))
+(def valid-connections
+  (memoize
+   (fn [adapters joltage]
+     (letfn [(valid-joltage? [x]
+               (<= 1 (- x joltage) 3))]
+       (if (empty? adapters)
+         1
+         (let [remaining (drop-while (complement valid-joltage?) adapters)
+               eligible (take-while valid-joltage? remaining)]
+           (if (seq eligible)
+             (reduce + (map #(valid-connections (remove (is %) remaining) %)
+                            eligible))
+             1)))))))
 
 (defn solution-b [filename]
   (as-> (read-jolts filename) v
