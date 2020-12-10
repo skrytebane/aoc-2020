@@ -42,7 +42,7 @@
          (let [remaining (drop-while (complement valid-joltage?) adapters)
                eligible (take-while valid-joltage? remaining)]
            (if (seq eligible)
-             (reduce + (map #(valid-connections (remove (is %) remaining) %)
+             (reduce + (map #(valid-connections remaining %)
                             eligible))
              1)))))))
 
@@ -60,5 +60,5 @@
 
   (solution-b "sample-10-a.txt") ;; 8
   (solution-b "sample-10-b.txt") ;; 19208
-  (solution-b "input-10.txt") ;; ?
+  (solution-b "input-10.txt") ;; 4628074479616
   )
