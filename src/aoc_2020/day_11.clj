@@ -3,8 +3,8 @@
             [clojure.string :as str]))
 
 (defn- seating-size [m]
-  [(count m)
-   (count (nth m 0))])
+  [(count (nth m 0))
+   (count m)])
 
 (defn- pos-get [m x y]
   (let [[sx sy] (seating-size m)]
@@ -14,11 +14,7 @@
       nil)))
 
 (defn- pos-set [m x y v]
-  (map-indexed (fn [cy line]
-                 (if (= cy y)
-                   (update line x (constantly v))
-                   line))
-               m))
+  (update m y #(assoc % x v)))
 
 (defn- show-map [m]
   (do (->> m
@@ -51,13 +47,28 @@
                  (occupied? (pos-get m nx ny))))
        empty?))
 
+(defn- seat-step [m [x y]]
+  (->> (case (pos-get m x y)
+         ;; Empty
+         \L (if (free-neighbours? m x y)
+              \#
+              \L)
+         ;; Occupied
+         \# (if (>= (->> (neighbours x y)
+                         (filter (fn [[nx ny]]
+                                   (occupied? (pos-get m nx ny))))
+                         count)
+                    4)
+              \L
+              \#)
+         ;; Floor
+s         \. \.)
+       (vector x y)))
+
 (defn- step [m]
   (let [changes (->> m
                      seat-positions
-                     (filter (fn [[x y]]
-                               (and (free? (pos-get m x y))
-                                    (free-neighbours? m x y))))
-                     (map (fn [[x y]] (vector x y \#))))]
+                     (map #(seat-step m %)))]
     (loop [nm m
            changes changes]
       (if (empty? changes)
@@ -65,14 +76,26 @@
         (let [[x y v] (first changes)]
           (recur (pos-set nm x y v) (rest changes)))))))
 
+(defn- steps [m]
+  (loop [m m]
+    (let [next-step (step m)]
+      (if (= m next-step)
+        m
+        (recur next-step)))))
+
 (defn solution-a [filename]
-  (-> filename
-      slurp-lines
-      parse-map))
+  (->> filename
+       slurp-lines
+       parse-map
+       steps
+       flatten
+       (filter #(= % \#))
+       count))
 
 (defn scratch []
   (solution-a "sample-11.txt"))
 
 (comment
   (solution-a "sample-11.txt")
+  (solution-a "input-11.txt")
   )
