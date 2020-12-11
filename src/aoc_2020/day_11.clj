@@ -2,7 +2,9 @@
   (:require [aoc-2020.core :refer [slurp-lines parse-map]]
             [clojure.string :as str]))
 
-(defn- seating-size [m]
+(defn- seating-size
+  "Returns [width height] of given map."
+  [m]
   [(count (nth m 0))
    (count m)])
 
@@ -14,14 +16,7 @@
       nil)))
 
 (defn- pos-set [m x y v]
-  (update m y #(assoc % x v)))
-
-(defn- show-map [m]
-  (do (->> m
-           (map #(str/join "" %))
-           (map println)
-           count)
-      nil))
+  (update-in m [y x] (constantly v)))
 
 (defn- neighbours [x y]
   (for [ny (range (dec y) (+ 2 y))
@@ -31,15 +26,12 @@
 
 (defn- seat-positions [m]
   (let [[sx sy] (seating-size m)]
-    (for [x (range sx)
-          y (range sy)]
+    (for [y (range sy)
+          x (range sx)]
       [x y])))
 
 (defn- occupied? [seat]
   (= seat \#))
-
-(defn- free? [seat]
-  (= seat \L))
 
 (defn- free-neighbours? [m x y]
   (->> (neighbours x y)
@@ -53,6 +45,7 @@
          \L (if (free-neighbours? m x y)
               \#
               \L)
+
          ;; Occupied
          \# (if (>= (->> (neighbours x y)
                          (filter (fn [[nx ny]]
@@ -61,20 +54,20 @@
                     4)
               \L
               \#)
+
          ;; Floor
-s         \. \.)
+         \. \.)
        (vector x y)))
 
 (defn- step [m]
-  (let [changes (->> m
-                     seat-positions
-                     (map #(seat-step m %)))]
-    (loop [nm m
-           changes changes]
-      (if (empty? changes)
-        nm
-        (let [[x y v] (first changes)]
-          (recur (pos-set nm x y v) (rest changes)))))))
+  (let [[xs _] (seating-size m)]
+    (->> m
+         seat-positions
+         (map #(seat-step m %))
+         (partition xs)
+         (mapv #(mapv (fn [x]
+                        (nth x 2))
+                      %)))))
 
 (defn- steps [m]
   (loop [m m]
@@ -92,10 +85,14 @@ s         \. \.)
        (filter #(= % \#))
        count))
 
-(defn scratch []
-  (solution-a "sample-11.txt"))
+(defn show-map [m]
+  (do (->> m
+           (map #(str/join "" %))
+           (map println)
+           count)
+      nil))
 
 (comment
-  (solution-a "sample-11.txt")
-  (solution-a "input-11.txt")
+  (solution-a "sample-11.txt") ; 37
+  (solution-a "input-11.txt")  ; 2273
   )
