@@ -59,28 +59,80 @@
          \. \.)
        (vector x y)))
 
-(defn- step [m]
+(defn- los-seats [m x y]
+  (let [[sx sy] (seating-size m)
+        n (mapv vector (repeat x) (range (dec y) -1 -1))
+        s (mapv vector (repeat x) (range (inc y) sy))
+        w (mapv vector (range (dec x) -1 -1) (repeat y))
+        e (mapv vector (range (inc x) sx) (repeat y))
+        nw (mapv vector (range (dec x) -1 -1) (range (dec y) -1 -1) )
+        ne (mapv vector (range (inc x) sx) (range (dec y) -1 -1))
+        sw (mapv vector (range (dec x) -1 -1) (range (inc y) sy))
+        se (mapv vector (range (inc x) sx) (range (inc y) sy))
+        paths (vector n s w e nw ne sw se)]
+    (->> paths
+         (map (fn [coords]
+             (map #(apply pos-get m %) coords)))
+         (map #(filter (fn [seat] (not (= seat \.))) %))
+         (map first))))
+
+(defn- free-los? [m x y]
+  (->> (los-seats m x y)
+       (filter #(occupied? %))
+       empty?))
+
+(defn- seat-los-step [m [x y]]
+  (->> (case (pos-get m x y)
+         ;; Empty
+         \L (if (free-los? m x y)
+              \#
+              \L)
+
+         ;; Occupied
+         \# (if (>= (->> (los-seats m x y)
+                         (filter #(occupied? %))
+                         count)
+                    5)
+              \L
+              \#)
+
+         ;; Floor
+         \. \.
+         )
+       (vector x y)))
+
+(defn- step [f m]
   (let [[xs _] (seating-size m)]
     (->> m
          seat-positions
-         (map #(seat-step m %))
+         (map #(f m %))
          (partition xs)
          (mapv #(mapv (fn [x]
                         (nth x 2))
                       %)))))
 
-(defn- steps [m]
-  (loop [m m]
-    (let [next-step (step m)]
+(defn- steps [sf f m]
+  (loop [m m
+         s 0]
+    (let [next-step (f sf m)]
       (if (= m next-step)
         m
-        (recur next-step)))))
+        (recur next-step (inc s))))))
 
 (defn solution-a [filename]
   (->> filename
        slurp-lines
        parse-map
-       steps
+       (steps seat-step step)
+       flatten
+       (filter #(= % \#))
+       count))
+
+(defn solution-b [filename]
+  (->> filename
+       slurp-lines
+       parse-map
+       (steps seat-los-step step)
        flatten
        (filter #(= % \#))
        count))
