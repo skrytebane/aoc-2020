@@ -24,6 +24,11 @@
 (defn parse-ints [lines]
   (map #(Long/parseLong %) lines))
 
+(defn parse-map
+  "Parse lines into a 2D vector with y,x coordinates."
+  [lines]
+  (mapv vec lines))
+
 (defn split-whitespace [s]
   (str/split s #"\s+"))
 

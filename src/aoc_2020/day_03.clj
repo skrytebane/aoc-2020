@@ -1,9 +1,5 @@
 (ns aoc-2020.day-03
-  (:require [aoc-2020.core :refer [slurp-lines]]))
-
-(defn parse-map [lines]
-  "[y,x] 2D-vector"
-  (mapv vec lines))
+  (:require [aoc-2020.core :refer [slurp-lines parse-map]]))
 
 (defn map-size [m]
   "Returns [width height]"
