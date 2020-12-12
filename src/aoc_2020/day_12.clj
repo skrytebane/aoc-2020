@@ -25,8 +25,8 @@
 
 (defn- step [pos [direction distance]]
   (case direction
-    \N (update pos :north #(- % distance))
-    \S (update pos :north #(+ % distance))
+    \N (update pos :north #(+ % distance))
+    \S (update pos :north #(- % distance))
     \E (update pos :east #(+ % distance))
     \W (update pos :east #(- % distance))
     \F (step pos [(:facing pos) distance])
@@ -42,9 +42,48 @@
        (map parse-navigation)
        (travel init-pos)
        ((juxt :east :north))
+       (map #(Math/abs %))
+       (reduce +)))
+
+(def init-wp
+  (assoc init-pos
+         :wp-north (inc (:north init-pos))
+         :wp-east (+ 10 (:east init-pos))))
+
+(defn- rotate-waypoint [pos degrees]
+  (let [radians (Math/toRadians degrees)
+        s (Math/sin radians)
+        c (Math/cos radians)]
+    (assoc pos
+           :wp-east (Math/round (- (* (:wp-east pos) c)
+                                   (* (:wp-north pos) s)))
+           :wp-north (Math/round (+ (* (:wp-east pos) s)
+                                    (* (:wp-north pos) c))))))
+
+(defn- step-waypoint [pos [direction distance]]
+  (case direction
+    \N (update pos :wp-north #(+ % distance))
+    \S (update pos :wp-north #(- % distance))
+    \E (update pos :wp-east #(+ % distance))
+    \W (update pos :wp-east #(- % distance))
+    \F (-> pos
+           (update :north #(+ % (* (:wp-north pos) distance)))
+           (update :east #(+ % (* (:wp-east pos) distance))))
+    \L (rotate-waypoint pos distance)
+    \R (rotate-waypoint pos (- distance))))
+
+(defn solution-b [filename]
+  (->> filename
+       slurp-lines
+       (map parse-navigation)
+       (reduce step-waypoint init-wp)
+       ((juxt :east :north))
+       (map #(Math/abs %))
        (reduce +)))
 
 (comment
   (solution-a "sample-12.txt")
   (solution-a "input-12.txt")
+  (solution-b "sample-12.txt")
+  (solution-b "input-12.txt")
   )
