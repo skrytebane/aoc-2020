@@ -1,6 +1,7 @@
 (ns aoc-2020.day-14
   (:require [aoc-2020.core :refer [slurp-lines]]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clojure.pprint :refer [cl-format]]))
 
 (defn- parse-bitfiddle [line]
   (let [[_ mask] (re-matches #"mask\s*=\s*([10X]+)" line)
@@ -8,7 +9,7 @@
     (cond
       (string? mask) {:mask mask}
       (string? address) {:address (Long/parseUnsignedLong address)
-                         :value (Long/parseUnsignedLong value)}
+                         :value (bigint (Long/parseUnsignedLong value))}
       :else "ffs")))
 
 (defn- make-or-mask [mask]
@@ -62,22 +63,48 @@
         (let [addr (compute-address address mask (first expanded))]
           (recur (rest expanded) (assoc memory addr value)))))))
 
-(defn- count-mem [instructions]
+(defn- compute-vmem [mask address value]
+  (let [or-mask (make-or-mask mask)
+        and-mask (make-and-mask mask)
+        fixed-addr (bit-and (bit-or address or-mask) and-mask)
+        str-addr (cl-format nil "~36,'0',B" fixed-addr)]
+    {:address (str/join "" (mapv (fn [x mm]
+                                   (if (= mm \X)
+                                     \X
+                                     x))
+                                 str-addr mask))
+     :value value}))
+
+(defn- gather-addresses [instructions]
   (loop [instructions instructions
-         memory {}
-         mask nil]
+         mask nil
+         vmem []]
     (if (empty? instructions)
-      memory
+      vmem
       (let [instruction (first instructions)]
         (if (:mask instruction)
-          (recur (rest instructions) memory (:mask instruction))
-          (recur (rest instructions) (update-memory memory mask (:address instruction) (:value instruction)) mask))))))
+          (recur (rest instructions) (:mask instruction) vmem)
+          (recur (rest instructions) mask
+                 (conj vmem (compute-vmem mask (:address instruction) (:value instruction)))))))))
+
+(defn- count-vals [item]
+  (* (Math/round
+      (Math/pow 2
+                (->> (:address item)
+                     (filter #(= % \X))
+                     count)))
+     (:value item)))
 
 (defn solution-b [filename]
   (->> filename
        slurp-lines
        (map parse-bitfiddle)
-       count-mem))
+       gather-addresses
+       (group-by :address)
+       vals
+       (map last)
+       (map count-vals)
+       (reduce +)))
 
 (comment
   (solution-a "sample-14.txt")
