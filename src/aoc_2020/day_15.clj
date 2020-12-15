@@ -21,6 +21,33 @@
                (assoc! prev current prev-turn)
                next-num)))))
 
+;; This function isn't used, just wanted to see how it would look
+;; like as a lazy sequence.
+(defn- gen-lazy-steps
+  ([init]
+   (gen-lazy-steps init
+                   (count init)
+                   (transient
+                    (reduce
+                     merge
+                     {}
+                     (map vector (butlast init)
+                          (range (dec (count init))))))
+                   (last init)))
+  ([init turn prev current]
+   (lazy-seq
+    (concat
+     (butlast init)
+     (cons current
+           (let [prev-turn (dec turn)
+                 next-num (if-let [prev-index (get prev current)]
+                            (- prev-turn prev-index)
+                            0)]
+             (gen-lazy-steps nil
+                             (inc turn)
+                             (assoc! prev current prev-turn)
+                             next-num)))))))
+
 (defn solution-a [init]
   (generate-steps init 2020))
 
