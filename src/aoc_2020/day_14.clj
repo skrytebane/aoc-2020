@@ -84,14 +84,15 @@
           (recur (rest instructions) mask
                  (->> (compute-addresses mask (:address instruction))
                       (map #(hash-map % (:value instruction)))
-                      (reduce merge))))))))
+                      (reduce merge mem))))))))
 
 (defn solution-b [filename]
   (->> filename
        slurp-lines
        (map parse-bitfiddle)
        compute-mem
-       ))
+       vals
+       (reduce +)))
 
 (comment
   (solution-a "sample-14.txt")
