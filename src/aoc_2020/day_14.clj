@@ -46,67 +46,55 @@
        vals
        (reduce +)))
 
-(defn- compute-address [address mask expanded]
-  ;; TODO: WIP HERE
-  )
+(defn- compute-address [address indexes bits]
+  (loop [address address
+         indexes indexes
+         bits bits]
+    (if (empty? indexes)
+      address
+      (let [index (first indexes)
+            bit (first bits)]
+        (recur (if (zero? bit)
+                 (bit-clear address index)
+                 (bit-set address index))
+               (rest indexes) (rest bits))))))
 
-(defn- update-memory [memory mask address value]
+(defn- compute-addresses [mask address]
   (let [or-mask (make-or-mask mask)
-        and-mask (make-and-mask mask)
-        address (bit-and (bit-or address or-mask) and-mask)
-        wildcards (->> mask (filter #(= % \X)) count)
-        expanded (range 0 (long (Math/pow 2 wildcards)))]
-    (loop [expanded expanded
-           memory memory]
-      (if (empty? expanded)
-        memory
-        (let [addr (compute-address address mask (first expanded))]
-          (recur (rest expanded) (assoc memory addr value)))))))
+        address (bit-or address or-mask)
+        indexes (->> (map-indexed vector (reverse mask))
+                     (filter (fn [[_ n]] (= n \X)))
+                     (mapv first))
+        wildcard-count (Math/round (Math/pow 2 (count indexes)))
+        wildcards (->> (map #(cl-format nil "~v,'0B" (count indexes) %) (range 0 wildcard-count))
+                       (map #(map (fn [c] (Character/digit c 2)) %)))]
+    (->> wildcards
+         (map #(compute-address address indexes %))
+         set)))
 
-(defn- compute-vmem [mask address value]
-  (let [or-mask (make-or-mask mask)
-        and-mask (make-and-mask mask)
-        fixed-addr (bit-and (bit-or address or-mask) and-mask)
-        str-addr (cl-format nil "~36,'0',B" fixed-addr)]
-    {:address (str/join "" (mapv (fn [x mm]
-                                   (if (= mm \X)
-                                     \X
-                                     x))
-                                 str-addr mask))
-     :value value}))
-
-(defn- gather-addresses [instructions]
+(defn- compute-mem [instructions]
   (loop [instructions instructions
          mask nil
-         vmem []]
+         mem {}]
     (if (empty? instructions)
-      vmem
+      mem
       (let [instruction (first instructions)]
         (if (:mask instruction)
-          (recur (rest instructions) (:mask instruction) vmem)
+          (recur (rest instructions) (:mask instruction) mem)
           (recur (rest instructions) mask
-                 (conj vmem (compute-vmem mask (:address instruction) (:value instruction)))))))))
-
-(defn- count-vals [item]
-  (* (Math/round
-      (Math/pow 2
-                (->> (:address item)
-                     (filter #(= % \X))
-                     count)))
-     (:value item)))
+                 (->> (compute-addresses mask (:address instruction))
+                      (map #(hash-map % (:value instruction)))
+                      (reduce merge))))))))
 
 (defn solution-b [filename]
   (->> filename
        slurp-lines
        (map parse-bitfiddle)
-       gather-addresses
-       (group-by :address)
-       vals
-       (map last)
-       (map count-vals)
-       (reduce +)))
+       compute-mem
+       ))
 
 (comment
   (solution-a "sample-14.txt")
   (solution-a "input-14.txt")
+  (solution-b "sample-14.txt")
   )
