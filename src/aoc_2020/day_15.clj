@@ -27,21 +27,22 @@
 
 (defn- ngen-seq [nums stop]
   (loop [turn (count nums)
-         prev-indexes (reduce merge {}
-                              (map vector
-                                   (butlast nums)
-                                   (range (dec (count nums)))))
+         prev-indexes (transient
+                       (reduce merge {}
+                               (map vector
+                                    (butlast nums)
+                                    (range (dec (count nums))))))
          current (last nums)]
     (if (= turn stop)
       current
       (let [prev-index (get prev-indexes current)]
         (if (nil? prev-index)
           (recur (inc turn)
-                 (assoc prev-indexes current (dec turn))
+                 (assoc! prev-indexes current (dec turn))
                  0)
           (let [next-num (- (dec turn) prev-index)]
             (recur (inc turn)
-                   (assoc prev-indexes current (dec turn))
+                   (assoc! prev-indexes current (dec turn))
                    next-num)))))))
 
 (defn solution-b [nums]
