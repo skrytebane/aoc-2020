@@ -65,7 +65,72 @@
        (filter #(= % \#))
        count))
 
+(def hyper-directions
+  (vec
+   (for [x (range -1 2)
+         y (range -1 2)
+         z (range -1 2)
+         w (range -1 2)
+         :when (not= x y z w 0)]
+     [x y z w])))
+
+(defn- hyper-neighbour-coordinates [x y z w]
+  (map #(map + [x y z w] %) hyper-directions))
+
+(defn- hyper-neighbours [cube x y z w]
+  (->> (hyper-neighbour-coordinates x y z w)
+       (map #(get cube %))))
+
+(defn- hyper-expand-cube [cube]
+  (loop [cube cube
+         neighbours (mapcat #(apply hyper-neighbour-coordinates %) (keys cube))]
+    (if-let [neighbour (first neighbours)]
+      (recur (assoc cube
+                    (vec neighbour)
+                    (get cube (vec neighbour) \.))
+             (rest neighbours))
+      cube)))
+
+(defn- hyper-active-neighbours [cube x y z w]
+  (->> (hyper-neighbours cube x y z w)
+       (filter active?)
+       count))
+
+(defn- hyper-step [cube]
+  (->> cube
+       hyper-expand-cube
+       (map (fn [[[x y z w] state]]
+              [[x y z w]
+               (let [active-neighbour-count (hyper-active-neighbours cube x y z w)]
+                 (cond
+                   (and (active? state)
+                        (contains? #{2 3} active-neighbour-count))
+                   \#
+                   (and (not (active? state))
+                        (= 3 active-neighbour-count))
+                   \#
+                   :else \.))]))
+       (reduce merge {})))
+
+(defn- make-hypercube [init]
+  (->> (for [y (range (count init))
+             x (range (count (nth init 0)))]
+         {[x y 0 0] (nth (nth init y) x)})
+       (reduce merge)))
+
+(defn solution-b [filename]
+  (->> filename
+       slurp-lines
+       parse-map
+       make-hypercube
+       ((apply comp (take 6 (repeat hyper-step))))
+       vals
+       (filter #(= % \#))
+       count))
+
 (comment
   (solution-a "sample-17.txt")
   (solution-a "input-17.txt")
+  (solution-b "sample-17.txt")
+  (solution-b "input-17.txt")
   )
