@@ -9,34 +9,42 @@
                 (Long/parseLong digit)
                 operator)))))
 
-(declare evaluate-expr)
-
-;; (1 + (2 + (3 + 4 + 5)))
-(defn- evaluate-paren [tokens]
-  (let [[acc remaining] (evaluate-expr (rest tokens))]
-    [acc (drop 2 remaining)]))
-
-(defn- evaluate-expr [tokens]
-  (let [token (first tokens)]
+(defn- parse-expr [tokens]
+  (println (str (vec tokens)))
+  (let [[x op y & r] tokens]
     (cond
-      (int? token)
-      (let [operator (first (rest tokens))
-            [acc remaining] (evaluate-expr (drop 2 tokens))]
-        (case operator
-          "*" [(* token acc) remaining]
-          "+" [(+ token acc) remaining]))
+      (int? x)
+      (case op
+        ("+" "*")
+        (cond (int? y)
+              (if (= (first r) ")")
+                (list op x y)
+                (list (first r)
+                      (parse-expr (rest r))
+                      (list op x y)))
 
-      (= "(" token)
-      (let [[acc remaining] (evaluate-paren tokens)]
-        (if remaining
-          2111
-          acc)))))
+              (= y "(")
+              (list op x (parse-expr r))))
+
+      (= x ")")
+      nil
+
+      (= x "(")
+      (parse-expr (rest tokens)))))
+
+(defn- eval-expr [expr]
+  (if (int? expr)
+    expr
+    (let [[op x y] expr]
+      (case op
+        "+" (+ (eval-expr x) (eval-expr y))
+        "*" (* (eval-expr x) (eval-expr y))))))
 
 (defn solution-a [filename]
   (->> filename
        slurp-lines
        (map tokenize-expr)
-       (map evaluate-expr)))
+       (map parse-expr)))
 
 (comment
   (solution-a "sample-18.txt")
