@@ -7,43 +7,45 @@
        (map second)
        (map keyword)))
 
-(defn- move [directions]
-  (loop [x 0
-         y 0
-         directions directions]
-    (if (empty? directions)
-      [x y]
-      (let [[nx ny]
-            (case (first directions)
-              :w [(dec x) y]
-              :nw [(dec x) (inc y)]
-              :sw [(dec x) (dec y)]
-              :e [(inc x) y]
-              :ne [(inc x) (inc y)]
-              :se [(inc x) (dec y)])]
-        (recur nx ny (rest directions))))))
+(defn- compute-position [directions]
+  (reduce
+   (fn [[x y] direction]
+     (case direction
+       :w [(- x 2) y]
+       :nw [(dec x) (inc y)]
+       :sw [(dec x) (dec y)]
+       :e [(+ x 2) y]
+       :ne [(inc x) (inc y)]
+       :se [(inc x) (dec y)]))
+   [0 0]
+   directions))
 
 (defn- flip-tile [tile-value]
   (case tile-value
     (:white nil) :black
     :black :white))
 
-(defn- flip-tiles [directions]
-  (loop [state {}
-         directions directions]
-    (if (empty? directions)
-      state
-      (let [pos (move (first directions))]
-        (println "pos" (str pos) "m" (str state))
-        (recur (update state pos flip-tile)
-               (rest directions))))))
+(defn- flip-tiles [positions]
+  (reduce
+   (fn [state directions]
+     (update state (compute-position directions) flip-tile))
+   {}
+   positions))
+
+(defn- count-black-tiles [tiles]
+  (->> tiles
+       vals
+       (filter #(contains? #{:black} %))
+       count))
 
 (defn solution-a [filename]
   (->> filename
        slurp-lines
        (map parse-directions)
-       flip-tiles))
+       flip-tiles
+       count-black-tiles))
 
 (comment
   (solution-a "sample-24.txt")
+  (solution-a "input-24.txt")
   )
