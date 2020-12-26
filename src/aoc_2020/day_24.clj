@@ -20,34 +20,21 @@
 (defn- compute-position [directions]
   (reduce adjust-position [0 0] directions))
 
-(defn- flip-tile [tile-value]
-  (case tile-value
-    (:white nil) :black
-    :black :white))
-
-(defn- flip-tiles [positions]
-  (reduce
-   (fn [state directions]
-     (update state (compute-position directions) flip-tile))
-   {}
-   positions))
-
-(defn- count-black-tiles [tiles]
-  (->> tiles
-       vals
-       frequencies
-       :black))
-
 (defn- arrange-tiles [filename]
   (->> filename
        slurp-lines
        (map parse-directions)
-       flip-tiles))
+       (map compute-position)
+       (reduce (fn [black pos]
+                 (if (contains? black pos)
+                   (set/difference black #{pos})
+                   (set/union black #{pos})))
+               #{})))
 
 (defn solution-a [filename]
   (->> filename
        arrange-tiles
-       count-black-tiles))
+       count))
 
 (defn- neighbours [[x y]]
   (for [direction [:w :nw :sw :e :ne :se]]
