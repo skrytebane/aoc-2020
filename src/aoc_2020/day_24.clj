@@ -66,10 +66,10 @@
        set))
 
 (defn solution-b [filename]
-  (->> filename
-       arrange-tiles
-       ((apply comp (take 100 (repeat flip-tiles))))
-       count))
+  (as-> (arrange-tiles filename) v
+    (iterate flip-tiles v)
+    (nth v 100)
+    (count v)))
 
 (comment
   (solution-a "sample-24.txt")
