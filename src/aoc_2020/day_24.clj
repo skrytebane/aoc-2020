@@ -25,10 +25,10 @@
        slurp-lines
        (map parse-directions)
        (map compute-position)
-       (reduce (fn [black pos]
-                 (if (contains? black pos)
-                   (set/difference black #{pos})
-                   (set/union black #{pos})))
+       (reduce (fn [blacks pos]
+                 (if (contains? blacks pos)
+                   (set/difference blacks #{pos})
+                   (set/union blacks #{pos})))
                #{})))
 
 (defn solution-a [filename]
@@ -40,42 +40,36 @@
   (for [direction [:w :nw :sw :e :ne :se]]
     (adjust-position [x y] direction)))
 
-(defn- adjacent-tiles [m pos]
+(defn- all-tiles [black-tiles]
+  (->> black-tiles
+       (mapcat neighbours)
+       set
+       (set/union black-tiles)))
+
+(defn adjacent-blacks [black-tiles pos]
   (->> pos
        neighbours
-       (map #(get m %))
-       (remove nil?)
-       frequencies))
+       (filter #(contains? black-tiles %))
+       count))
 
-(defn- expand-floor [tiles]
-  (let [positions (set (keys tiles))]
-    (->> positions
-         (map neighbours)
-         (map set)
-         (reduce set/union positions)
-         (map #(vector % (get tiles % :white)))
-         (reduce merge {}))))
+(defn- flip-to-black? [black-tiles pos]
+  (let [adjacent-blacks (adjacent-blacks black-tiles pos)]
+    (if (contains? black-tiles pos)
+      (not (or (zero? adjacent-blacks)
+               (> adjacent-blacks 2)))
+      (= adjacent-blacks 2))))
 
-(defn- rearrange-tiles [tiles]
-  (->> (for [[pos color] tiles]
-         (let [adjacent (adjacent-tiles tiles pos)]
-           [pos
-            (case color
-              :black (if (or (zero? (:black adjacent 0))
-                             (>= (:black adjacent 0) 2))
-                       :white
-                       :black)
-              :white (if (= 2 (:black adjacent 0))
-                       :black
-                       :white))]))
-       (reduce merge {})))
+(defn- flip-tiles [black-tiles]
+  (->> black-tiles
+       all-tiles
+       (filter (partial flip-to-black? black-tiles))
+       set))
 
 (defn solution-b [filename]
   (->> filename
        arrange-tiles
-       expand-floor
-       rearrange-tiles
-       ))
+       ((apply comp (take 100 (repeat flip-tiles))))
+       count))
 
 (comment
   (solution-a "sample-24.txt")
